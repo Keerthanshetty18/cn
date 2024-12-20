@@ -1,0 +1,95 @@
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.Scanner;
+
+public class UDPClient {
+    public static void main(String[] args) {
+        DatagramSocket socket = null;
+        Scanner scanner = new Scanner(System.in);
+
+        try {
+            System.out.print("Enter the server IP address: ");
+            String serverIp = scanner.nextLine();
+            System.out.print("Enter the server port: ");
+            int serverPort = scanner.nextInt();
+            scanner.nextLine();  // Consume the newline
+
+            socket = new DatagramSocket();
+            System.out.println("Client is running...");
+
+            while (true) {
+                System.out.print("Enter message to send to server (type 'exit' to quit): ");
+                String message = scanner.nextLine();
+
+                if (message.equalsIgnoreCase("exit")) {
+                    System.out.println("Exiting client.");
+                    break;
+                }
+
+                // Send message to server
+                byte[] sendData = message.getBytes();
+                InetAddress serverAddress = InetAddress.getByName(serverIp);
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, serverAddress, serverPort);
+                socket.send(sendPacket);
+                System.out.println("Sent message: " + message);
+
+                // Receive response from server
+                byte[] receiveData = new byte[1024];
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                socket.receive(receivePacket);
+                String response = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                System.out.println("Received from server: " + response);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+            scanner.close();
+        }
+    }
+}
+  udp client
+
+
+
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+
+public class UDPServer {
+    public static void main(String[] args) {
+        DatagramSocket socket = null;
+
+        try {
+            int serverPort = 9876; // Change this to your desired port
+            socket = new DatagramSocket(serverPort);
+            System.out.println("Server is running on port " + serverPort + "...");
+
+            while (true) {
+                // Receive message from client
+                byte[] receiveData = new byte[1024];
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                socket.receive(receivePacket);
+                String clientMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
+                System.out.println("Received from client: " + clientMessage);
+
+                // Send response to client
+                String response = "Echo: " + clientMessage;
+                byte[] sendData = response.getBytes();
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
+                        receivePacket.getAddress(), receivePacket.getPort());
+                socket.send(sendPacket);
+                System.out.println("Sent response to client: " + response);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        }
+    }
+}
+  udp server

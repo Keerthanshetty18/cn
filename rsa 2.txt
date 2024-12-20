@@ -1,0 +1,24 @@
+import random
+import math
+
+# Prime numbers and RSA keys setup
+p, q = 997, 1103
+n, phi = p * q, (p - 1) * (q - 1)
+e = random.choice([x for x in range(3, phi) if math.gcd(x, phi) == 1])
+d = pow(e, -1, phi)
+
+# Encryption and decryption functions
+def encrypt_string(message):
+    return [pow(ord(char), e, n) for char in message]
+
+def decrypt_string(encrypted_message):
+    return ''.join(chr(pow(char, d, n)) for char in encrypted_message)
+
+# Test the implementation
+message = "Hello RSA!"
+encrypted_message = encrypt_string(message)
+decrypted_message = decrypt_string(encrypted_message)
+
+print(f"Original message: {message}")
+print(f"Encrypted message: {encrypted_message}")
+print(f"Decrypted message: {decrypted_message}")
